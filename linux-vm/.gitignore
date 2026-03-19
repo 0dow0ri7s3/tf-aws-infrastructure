@@ -1,0 +1,21 @@
+# Terraform state
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Saved plans
+tfplan
+
+# Crash logs
+crash.log
+
+# Sensitive var files
+*.tfvars
+*.tfvars.json
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
