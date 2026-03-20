@@ -1,0 +1,18 @@
+# Terraform state — contains sensitive resource info
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Saved plans
+tfplan
+
+# Crash logs
+crash.log
+
+# Sensitive variable files — never commit these
+*.tfvars
+*.tfvars.json
+
+# Environment files
+.env
