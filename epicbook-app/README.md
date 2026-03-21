@@ -4,7 +4,7 @@ Deploys the EpicBook full-stack web application on AWS using Terraform. The enti
 
 ---
 
-![Architecture](./docs/epicbookvc.png)
+![Architecture](./docs/epicbook.png)
 
 ---
 
