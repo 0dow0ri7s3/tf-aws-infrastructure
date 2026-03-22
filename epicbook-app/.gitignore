@@ -1,6 +1,8 @@
 # Terraform state — contains sensitive resource info
 *.tfstate
 *.tfstate.backup
+*.tfstate.1774020352.backup
+*.tfstate.1774020196.backup
 .terraform/
 .terraform.lock.hcl
 
