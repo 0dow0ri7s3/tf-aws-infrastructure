@@ -1,6 +1,10 @@
-# EpicBook App — AWS
+# EpicBook App — Production-Style AWS Infrastructure with Terraform
 
-Deploys the EpicBook full-stack web application on AWS using Terraform. The entire infrastructure — VPC, public and private subnets, EC2, RDS MySQL, security groups, Nginx reverse proxy, and application setup — is fully automated. No manual steps after `terraform apply`.
+Production-oriented AWS infrastructure deployment for the EpicBook full-stack application using Terraform and Bash automation.
+
+This project provisions a complete AWS cloud environment including networking, compute, database infrastructure, security groups, Nginx reverse proxy, and automated application deployment with minimal manual intervention.
+
+The infrastructure is designed to simulate real-world DevOps deployment practices using Infrastructure as Code (IaC), secure networking principles, and automated provisioning workflows.
 
 ---
 
@@ -8,102 +12,211 @@ Deploys the EpicBook full-stack web application on AWS using Terraform. The enti
 
 ---
 
-## What This Builds
+# Project Goal
 
-**Network**
+The goal of this project was to simulate a production-style cloud deployment workflow while applying infrastructure automation and secure architecture principles.
+
+This project focuses on:
+
+- Infrastructure as Code (IaC)
+- Reproducible deployments
+- Secure database isolation
+- Cloud networking fundamentals
+- Automated provisioning
+- Operational simplicity
+- Production-style deployment structure
+
+---
+
+# What This Builds
+
+## Network
+
 - VPC (`10.0.0.0/16`)
-- Public subnet (`10.0.1.0/24`) — EC2 lives here
+- Public subnet (`10.0.1.0/24`) — EC2 application server
 - Private subnet A (`10.0.2.0/24`) — RDS primary
 - Private subnet B (`10.0.3.0/24`) — RDS subnet group requirement
 - Internet Gateway
 - Route table with IGW route associated to public subnet only
 
-**Security**
+## Security
+
 - EC2 security group — SSH (your IP only), HTTP (open)
-- RDS security group — MySQL port 3306 from EC2 SG only (SG-to-SG, not CIDR)
-- Egress rules on both SGs
+- RDS security group — MySQL port 3306 accessible only from EC2 security group
+- Security Group-to-Security Group communication instead of CIDR-based database access
+- Egress rules configured for outbound communication
 
-**Compute**
+## Compute
+
 - Ubuntu 22.04 LTS EC2 (`t2.micro`)
-- SSH key pair
-- Public IP enabled
-- userdata.sh runs on first boot — installs everything, seeds database, starts app
+- SSH key pair provisioning
+- Public IP assignment
+- Automated bootstrap process through `userdata.sh`
 
-**Database**
+## Database
+
 - RDS MySQL 8.0 (`db.t3.micro`)
-- Private subnet — no public access
-- DB subnet group spanning two AZs
-- Sequelize auto-creates tables on first run
+- Private subnet deployment with no public exposure
+- DB subnet group spanning two availability zones
+- Sequelize auto-generates tables during initial deployment
 
-**Application**
+## Application
+
 - Node.js + Express backend
-- PM2 process manager keeps app running
-- Nginx reverse proxy on port 80 → app on port 8080
-- SQL dumps imported automatically on first boot
+- PM2 process manager for persistent application runtime
+- Nginx reverse proxy on port 80 → Node.js app on port 8080
+- Automated SQL dump import during bootstrap process
 
 ---
 
-## Prerequisites
+# Architecture Flow
 
-- [Terraform](https://developer.hashicorp.com/terraform/install) installed
-- [AWS CLI](https://aws.amazon.com/cli/) installed and configured
-- An active AWS account
-- SSH key pair at `~/.ssh/id_rsa` and `~/.ssh/id_rsa.pub`
+1. User sends request to the EC2 public IP
+2. Nginx receives traffic on port 80
+3. Nginx proxies requests to the Node.js application running on port 8080
+4. Application communicates securely with RDS MySQL in private subnets
+5. Security groups restrict database access to the application server only
 
 ---
 
-## Project Structure
+# Prerequisites
 
-```
+- [Terraform](https://developer.hashicorp.com/terraform/install)
+- [AWS CLI](https://aws.amazon.com/cli/)
+- Active AWS account
+- SSH key pair located at:
+  - `~/.ssh/id_rsa`
+  - `~/.ssh/id_rsa.pub`
+
+---
+
+# Project Structure
+
+```bash
 epicbook-app/
-├── main.tf           # Provider, Terraform settings, shared data blocks
-├── variables.tf      # All input variables in one place
-├── outputs.tf        # EC2 IP, RDS endpoint, app URL
-├── network.tf        # VPC, subnets, IGW, route tables
+├── main.tf           # Provider and Terraform configuration
+├── variables.tf      # Input variables
+├── outputs.tf        # Terraform outputs
+├── network.tf        # VPC, subnets, routing
 ├── security.tf       # Security groups and rules
-├── compute.tf        # EC2 instance and SSH key pair
-├── database.tf       # RDS instance and DB subnet group
-├── userdata.sh       # Bootstrap script — full app deployment
-├── .gitignore        # Excludes state files and secrets
+├── compute.tf        # EC2 instance and SSH key
+├── database.tf       # RDS and DB subnet group
+├── userdata.sh       # Automated bootstrap and deployment
+├── .gitignore
 ├── README.md
 ├── WALKTHROUGH.md
 └── docs/
     └── architecture.png
 ```
 
-For a full step-by-step breakdown see [WALKTHROUGH.md](./WALKTHROUGH.md)
+For a full deployment walkthrough see:
+
+```bash
+WALKTHROUGH.md
+```
 
 ---
 
-## Setup
+# Tech Stack
 
-**1. Clone the repo**
+## Cloud Platform
+- AWS
+
+## Infrastructure as Code
+- Terraform
+
+## Compute & Runtime
+- EC2
+- Ubuntu 22.04
+- PM2
+- Nginx
+
+## Database
+- RDS MySQL 8.0
+
+## Backend
+- Node.js
+- Express.js
+
+## Scripting & Automation
+- Bash
+- userdata.sh
+
+---
+
+# Infrastructure Features
+
+- Fully automated provisioning using Terraform
+- Infrastructure separation across multiple Terraform files
+- Public and private subnet architecture
+- Secure database isolation
+- Automated application deployment
+- Dynamic SSH restriction based on deployer public IP
+- Reverse proxy setup using Nginx
+- Persistent Node.js runtime with PM2
+- Reproducible deployment workflow
+
+---
+
+# Setup
+
+## 1. Clone Repository
+
 ```bash
 git clone https://github.com/0dow0ri7s3/tf-aws-infrastructure.git
 cd tf-aws-infrastructure/epicbook-app
 ```
 
-**2. Configure AWS CLI**
+---
+
+## 2. Configure AWS CLI
+
 ```bash
 aws configure
 ```
 
-**3. Initialize Terraform**
+---
+
+## 3. Initialize Terraform
+
 ```bash
 terraform init
 ```
 
-**4. Plan and apply**
+---
+
+## 4. Plan Infrastructure
+
 ```bash
 terraform plan -out=tfplan
+```
+
+---
+
+## 5. Apply Infrastructure
+
+```bash
 terraform apply tfplan
 ```
 
-RDS takes 10 to 15 minutes to provision. EC2 comes up faster but the bootstrap script needs another 5 to 10 minutes to complete. Total wait time is approximately 20 minutes.
+---
 
-After apply you will see:
+# Deployment Timing
 
-```
+- EC2 provisioning: ~2–3 minutes
+- RDS provisioning: ~10–15 minutes
+- Bootstrap automation: ~5–10 minutes
+
+Estimated total deployment time:
+- ~20 minutes
+
+---
+
+# Terraform Outputs
+
+After deployment completes:
+
+```bash
 ec2_public_ip = "x.x.x.x"
 rds_endpoint  = "epicbook-rds.xxxxx.us-west-1.rds.amazonaws.com"
 app_url       = "http://x.x.x.x"
@@ -111,16 +224,15 @@ app_url       = "http://x.x.x.x"
 
 ---
 
-## Access the App
+# Access the Application
 
-Paste the app URL in your browser:
-```
+```bash
 http://<ec2_public_ip>
 ```
 
 ---
 
-## SSH Into the VM
+# SSH Into the EC2 Instance
 
 ```bash
 ssh -i ~/.ssh/id_rsa ubuntu@<ec2_public_ip>
@@ -128,27 +240,43 @@ ssh -i ~/.ssh/id_rsa ubuntu@<ec2_public_ip>
 
 ---
 
-## Verify Everything Is Running
+# Verify Services
+
+## Check PM2
 
 ```bash
-# Check app process
 pm2 status
+```
 
-# Check app is listening on port 8080
+---
+
+## Verify Application Port
+
+```bash
 ss -tulpn | grep 8080
+```
 
-# Check Nginx
+---
+
+## Check Nginx Status
+
+```bash
 sudo systemctl status nginx
+```
 
-# Check database connectivity
+---
+
+## Verify Database Connectivity
+
+```bash
 mysql -h <rds_endpoint> -u admin123 -p -e "USE bookstore; SELECT COUNT(*) FROM Book;"
 ```
 
 ---
 
-## Dynamic SSH IP
+# Dynamic SSH IP Restriction
 
-The SSH rule auto-fetches your current public IP at plan time:
+Terraform dynamically fetches the deployer's public IP:
 
 ```hcl
 data "http" "my_ip" {
@@ -156,7 +284,8 @@ data "http" "my_ip" {
 }
 ```
 
-If your IP changes just re-run:
+If your IP changes:
+
 ```bash
 terraform plan -out=tfplan
 terraform apply tfplan
@@ -164,31 +293,71 @@ terraform apply tfplan
 
 ---
 
-## Tear Down
+# Security Considerations
+
+- RDS deployed in private subnets with no public exposure
+- Database access restricted using Security Group references
+- SSH access limited to deployer's public IP
+- Public internet access restricted to application layer only
+- Infrastructure components separated through subnet segmentation
+- Controlled communication between application and database layers
+
+---
+
+# Tear Down Infrastructure
 
 ```bash
 terraform destroy
 ```
 
-RDS takes 10 to 15 minutes to delete. The VPC will wait until all RDS network interfaces are fully released by AWS before completing. This is normal. Let it run.
+Note:
+- RDS deletion may take 10–15 minutes
+- AWS waits for RDS ENIs to fully detach before deleting the VPC
+- This behavior is expected
 
 ---
 
-## Key Lessons
+# Key Lessons Learned
 
-- Multi-file Terraform structure separates concerns and mirrors production practice
-- RDS in a private subnet with SG-to-SG access is the production standard for database security
-- `templatefile()` injects dynamic values like the RDS endpoint into userdata at plan time
-- PM2 must run as the correct user — running as root causes startup issues on reboot
-- The app's `config/config.json` was hardcoded to localhost — Terraform overwrites it with real RDS credentials automatically
-- RDS needs a DB subnet group spanning two availability zones even for single-AZ deployments
-- `skip_final_snapshot = true` allows clean destroy in dev environments
-- VPC deletion waits for RDS ENIs to fully detach — this can take 10+ minutes and is expected behavior
+- Multi-file Terraform structure improves maintainability and separation of concerns
+- RDS private subnet deployment is standard practice for database security
+- Security Group-to-Security Group communication is safer than CIDR-based access
+- `templatefile()` allows dynamic infrastructure values to be injected into userdata scripts
+- PM2 must run under the correct Linux user to survive reboots properly
+- The application database configuration required dynamic RDS credential injection
+- RDS subnet groups require multi-AZ subnet definitions even in single-AZ deployments
+- AWS infrastructure teardown can be delayed due to ENI dependency cleanup
 
 ---
 
-## Author
+# Challenges Faced
 
-**Odoworitse Ab. Afari**
-Junior DevOps Engineer
-[GitHub](https://github.com/0dow0ri7s3) · [LinkedIn](https://linkedin.com/in/odoworitse-afari)
+- Managing secure communication between infrastructure layers
+- Configuring dynamic RDS connectivity during automated deployment
+- Handling PM2 process persistence correctly
+- Structuring Terraform files for readability and scalability
+- Understanding AWS networking and subnet behavior
+- Managing infrastructure teardown dependencies during destroy operations
+
+---
+
+# Future Improvements
+
+- Add Application Load Balancer (ALB)
+- Introduce Auto Scaling Group
+- Containerize application using Docker
+- Add CI/CD pipeline with GitHub Actions
+- Store Terraform remote state in S3 with DynamoDB locking
+- Add monitoring using Prometheus and Grafana
+- Introduce centralized logging
+- Deploy application using Kubernetes
+
+---
+
+# Author
+
+**Odoworitse Afari**  
+Cloud & DevOps Engineer
+
+GitHub: https://github.com/0dow0ri7s3  
+LinkedIn: https://linkedin.com/in/odoworitse-afari
