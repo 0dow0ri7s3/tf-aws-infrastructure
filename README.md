@@ -1,10 +1,12 @@
 # tf-aws-infrastructure
 
-Production-grade AWS infrastructure provisioned with Terraform.
+Terraform practice builds on AWS. Kept as a learning record.
 
-## Projects
+For production-style infrastructure work, see
+[epicbook-ha-infra-terraform](https://github.com/0dow0ri7s3/epicbook-ha-infra-terraform)
+— multi-AZ, Auto Scaling, layered security groups, OIDC-authenticated CI.
 
-| Project | Description | Stack |
-|---------|-------------|-------|
-| [linux-vm](./linux-vm) | Linux VM with public network | EC2, VPC, Security Group, Nginx |
-| [epicbook-app](./epicbook-app) | Full stack app with managed database | EC2, RDS MySQL, VPC, Nginx, Node.js, PM2 |
+| Build | What it covers |
+|---|---|
+| [linux-vm](./linux-vm) | Single EC2 instance, VPC, security group, Nginx |
+| [epicbook-app](./epicbook-app) | EC2 with RDS MySQL, Nginx, PM2 — single-instance version |
